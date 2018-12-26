@@ -131,7 +131,7 @@ class MNCDevice(object):
             ADB_EXECUTOR, '-s', self.device_id, 'shell',
             'LD_LIBRARY_PATH=/data/local/tmp', '/data/local/tmp/minicap', '-s', '-P', screen_size,
             '>', TEMP_PIC_ANDROID_PATH
-        ])
+        ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         logger.info('screen shot saved in {}'.format(TEMP_PIC_ANDROID_PATH))
 
     def export_screen(self, target_path):
@@ -139,10 +139,11 @@ class MNCDevice(object):
         subprocess.check_call([
             ADB_EXECUTOR, '-s', self.device_id,
             'pull', TEMP_PIC_ANDROID_PATH, target_path
-        ])
+        ], stdout=subprocess.DEVNULL)
         logger.info('export screen shot to {}'.format(target_path))
 
 
 if __name__ == '__main__':
     d = MNCDevice('3d33076e')
-    d.export_screen('.')
+    d.screen_shot()
+    d.export_screen('./aaa.png')
