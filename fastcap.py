@@ -60,16 +60,19 @@ class MNCInstaller(object):
             self.download_target_mnc_so()
 
     def get_abi(self):
+        """ get abi (application binary interface) """
         abi = subprocess.getoutput('{} -s {} shell getprop ro.product.cpu.abi'.format(ADB_EXECUTOR, self.device_id))
         logger.info('device {} abi is {}'.format(self.device_id, abi))
         return abi
 
     def get_sdk(self):
+        """ get sdk version """
         sdk = subprocess.getoutput('{} -s {} shell getprop ro.build.version.sdk'.format(ADB_EXECUTOR, self.device_id))
         logger.info('device {} sdk is {}'.format(self.device_id, sdk))
         return sdk
 
     def download_target_mnc(self):
+        """ download specific minicap """
         target_url = '{}/{}/bin/minicap'.format(MNC_PREBUILT_URL, self.abi)
         logger.info('target minicap url: ' + target_url)
         mnc_path = download_file(target_url)
@@ -83,6 +86,7 @@ class MNCInstaller(object):
         os.remove(mnc_path)
 
     def download_target_mnc_so(self):
+        """ download specific minicap.so (they should work together) """
         target_url = '{}/{}/lib/android-{}/minicap.so'.format(MNC_PREBUILT_URL, self.abi, self.sdk)
         logger.info('target minicap.so url: ' + target_url)
         mnc_so_path = download_file(target_url)
@@ -100,16 +104,19 @@ class MNCInstaller(object):
         )
 
     def is_mnc_installed(self):
+        """ check if minicap installed """
         return self.is_installed('minicap') and self.is_installed('minicap.so')
 
 
 class MNCDevice(object):
+    """ device operator """
     def __init__(self, device_id):
         self.device_id = device_id
         MNCInstaller(device_id)
         self.screen = self.get_size()
 
     def get_size(self):
+        """ get screen size, return value looks like (1080, 1920) """
         result_str = subprocess.check_output([
             ADB_EXECUTOR, '-s', self.device_id, 'shell',
             'wm', 'size'
@@ -118,6 +125,7 @@ class MNCDevice(object):
         return width, height
 
     def screen_shot(self):
+        """ take a screen shot """
         screen_size = '{}x{}@{}x{}/0'.format(self.screen[0], self.screen[1], self.screen[0], self.screen[1])
         subprocess.check_call([
             ADB_EXECUTOR, '-s', self.device_id, 'shell',
@@ -127,6 +135,7 @@ class MNCDevice(object):
         logger.info('screen shot saved in {}'.format(TEMP_PIC_ANDROID_PATH))
 
     def export_screen(self, target_path):
+        """ pull screen shot and move it to target path """
         subprocess.check_call([
             ADB_EXECUTOR, '-s', self.device_id,
             'pull', TEMP_PIC_ANDROID_PATH, target_path
