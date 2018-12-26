@@ -7,13 +7,13 @@ from loguru import logger
 
 
 # connection
-DEFAULT_HOST = '127.0.0.1'
 DEFAULT_CHARSET = 'utf-8'
 
 # installer
 MNC_PREBUILT_URL = r'https://github.com/williamfzc/stf-binaries/raw/master/node_modules/minicap-prebuilt/prebuilt'
 MNC_HOME = '/data/local/tmp/minicap'
 MNC_SO_HOME = '/data/local/tmp/minicap.so'
+TEMP_PIC_ANDROID_PATH = '/data/local/tmp/fastcap_temp.png'
 
 # system
 # 'Linux', 'Windows' or 'Darwin'.
@@ -103,5 +103,37 @@ class MNCInstaller(object):
         return self.is_installed('minicap') and self.is_installed('minicap.so')
 
 
+class MNCDevice(object):
+    def __init__(self, device_id):
+        self.device_id = device_id
+        MNCInstaller(device_id)
+        self.screen = self.get_size()
+
+    def get_size(self):
+        result_str = subprocess.check_output([
+            ADB_EXECUTOR, '-s', self.device_id, 'shell',
+            'wm', 'size'
+        ]).decode(DEFAULT_CHARSET)
+        width, height = result_str.replace('\n', '').replace('\r', '').split(' ')[-1].split('x')
+        return width, height
+
+    def screen_shot(self):
+        screen_size = '{}x{}@{}x{}/0'.format(self.screen[0], self.screen[1], self.screen[0], self.screen[1])
+        subprocess.check_call([
+            ADB_EXECUTOR, '-s', self.device_id, 'shell',
+            'LD_LIBRARY_PATH=/data/local/tmp', '/data/local/tmp/minicap', '-s', '-P', screen_size,
+            '>', TEMP_PIC_ANDROID_PATH
+        ])
+        logger.info('screen shot saved in {}'.format(TEMP_PIC_ANDROID_PATH))
+
+    def export_screen(self, target_path):
+        subprocess.check_call([
+            ADB_EXECUTOR, '-s', self.device_id,
+            'pull', TEMP_PIC_ANDROID_PATH, target_path
+        ])
+        logger.info('export screen shot to {}'.format(target_path))
+
+
 if __name__ == '__main__':
-    MNCInstaller('3d33076e')
+    d = MNCDevice('3d33076e')
+    d.export_screen('.')
