@@ -19,10 +19,7 @@ TEMP_PIC_ANDROID_PATH = '/data/local/tmp/fastcap_temp.png'
 # 'Linux', 'Windows' or 'Darwin'.
 SYSTEM_NAME = platform.system()
 NEED_SHELL = SYSTEM_NAME != 'Windows'
-if SYSTEM_NAME == 'Windows':
-    ADB_EXECUTOR = subprocess.getoutput('where adb')
-else:
-    ADB_EXECUTOR = subprocess.getoutput('which adb')
+ADB_EXECUTOR = 'adb'
 
 
 def download_file(target_url):
