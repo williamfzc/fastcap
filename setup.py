@@ -1,9 +1,9 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
 
 setup(
     name='fastcap',
-    version='0.1.1',
+    version='0.1.2',
     description='fast screen cap on android, with minicap.',
     author='williamfzc',
     author_email='fengzc@vip.qq.com',
